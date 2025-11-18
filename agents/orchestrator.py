@@ -165,6 +165,9 @@ class OrchestratorAgent:
     def __new__(cls):
         return orchestrator
 
+# Backwards-compatible alias for imports that expect a different name
+orchestrator_agent = orchestrator
+
 async def main():
     """Main entry point for local development."""
     runner = InMemoryRunner(agent=orchestrator)

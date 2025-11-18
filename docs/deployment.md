@@ -71,6 +71,33 @@ adk deploy agent_engine \
   --trace_to_cloud \
   --enable_cloud_trace \
   agents/orchestrator.py
+
+## CI/CD (GitHub Actions)
+
+We provide a GitHub Actions workflow at `.github/workflows/ci.yml` that runs the test suite and linters on pushes and pull requests to `main`.
+
+Secrets required for CI (set these in your repository `Settings → Secrets`):
+
+- `GOOGLE_API_KEY` — Gemini / Google API key used by demos or integration tests that need it.
+- `GCP_SA_KEY` (optional) — Base64-encoded GCP Service Account key if you want workflows to deploy to GCP.
+
+Example: to add a deploy step triggered manually or from a separate workflow, you can use `gcloud` with a Service Account key stored in `GCP_SA_KEY`.
+
+### Example deploy (CI-friendly)
+
+1. Create a service account with `roles/run.admin`, `roles/storage.admin`, and `roles/iam.serviceAccountUser`.
+2. Encode the key and add it to repository secrets as `GCP_SA_KEY`.
+3. In a deployment job, restore the key and authenticate:
+
+```bash
+echo "$GCP_SA_KEY" | base64 --decode > /tmp/gcp-key.json
+gcloud auth activate-service-account --key-file=/tmp/gcp-key.json
+gcloud config set project $PROJECT_ID
+```
+
+4. Build and push the container (same commands as above) and run `gcloud run deploy` or `adk deploy`.
+
+We intentionally separate test CI from deploy jobs so maintainers can review results before deployment.
 ```
 
 ## Configuration

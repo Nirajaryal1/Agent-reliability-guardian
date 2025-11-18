@@ -171,6 +171,9 @@ class ReportGeneratorAgent:
     def __new__(cls):
         return report_generator
 
+# Backwards-compatible alias for imports that expect a different name
+report_generator_agent = report_generator
+
 async def main():
     """Main entry point for local development."""
     runner = InMemoryRunner(agent=report_generator)

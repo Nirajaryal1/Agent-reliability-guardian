@@ -125,6 +125,9 @@ class TraceAnalyzerAgent:
     def __new__(cls):
         return trace_analyzer
 
+# Backwards-compatible alias for imports that expect a different name
+trace_analyzer_agent = trace_analyzer
+
 async def main():
     """Main entry point for local development."""
     runner = InMemoryRunner(agent=trace_analyzer)

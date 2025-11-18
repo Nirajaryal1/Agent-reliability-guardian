@@ -113,7 +113,7 @@ recovery_tool = FunctionTool(execute_recovery)
 
 # Create singleton instance
 recovery_agent = Agent(
-    name="recovery_agent",
+    name="recovery_pipeline",
     model="gemini-2.0-flash",
     instruction="""
     You are the Recovery Agent.
@@ -127,6 +127,9 @@ recovery_agent = Agent(
 class RecoveryPipelineAgent:
     def __new__(cls):
         return recovery_agent
+
+# Backwards-compatible alias for imports that expect a different name
+recovery_pipeline_agent = recovery_agent
 
 async def main():
     """Main entry point for local development."""

@@ -125,7 +125,7 @@ health_check_tool = FunctionTool(run_health_checks)
 
 # Create singleton instance
 health_checker = Agent(
-    name="health_checker",
+    name="health_check",
     model="gemini-2.0-flash",
     instruction="""
     You are the Health Check Agent.
@@ -139,6 +139,9 @@ health_checker = Agent(
 class HealthCheckAgent:
     def __new__(cls):
         return health_checker
+
+# Backwards-compatible alias for imports that expect a different name
+health_check_agent = health_checker
 
 async def main():
     """Main entry point for local development."""
