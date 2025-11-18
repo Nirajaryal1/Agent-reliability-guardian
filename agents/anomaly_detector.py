@@ -133,6 +133,9 @@ anomaly_detector = Agent(
     tools=[anomaly_tool]
 )
 
+# Backwards-compatible alias for imports that expect a different name
+anomaly_detector_agent = anomaly_detector
+
 # Compatibility class
 class AnomalyDetectorAgent:
     def __new__(cls):

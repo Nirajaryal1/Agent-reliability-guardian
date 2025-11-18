@@ -158,6 +158,43 @@ adk deploy agent_engine \
 
 ---
 
+## 📘 Notebook Demo
+
+- **File:** `Agent_Reliability_Guardian_Demo.ipynb` (repo root) — a reproducible Jupyter notebook that runs the red-team → subject → judge → fixer loop used in our evaluation demo.
+- **Run:** `jupyter lab Agent_Reliability_Guardian_Demo.ipynb` or open it in VS Code's notebook UI.
+- **Purpose:** Demonstrates the full evaluation pipeline end-to-end and prints structured, machine-readable outputs for inspection and audit.
+
+### Structured ADK Output Format
+
+Agents and the demo notebook emit parsed ADK events using the helper `utils.parse_adk_event` and are pretty-printed with `utils.to_json`. The parser produces a JSON-friendly object with these common fields:
+
+- `model_version`: the model identifier used (e.g., `gemini-2.0-flash`).
+- `role`: the originator of the content (`assistant`, `user`, `tool`, etc.).
+- `text`: the plain-text part of the response (if present).
+- `function_call`: optional object with `{ "name": <function_name>, "args": <json-serializable-args> }` when the model invoked a tool.
+- `function_responses`: optional list where each entry contains `{ "id": <call_id>, "name": <tool_name>, "response": <string-or-json> }` representing tool/function outputs.
+- `finish_reason`: why the model finished (e.g., `stop`, `function_call`).
+- `usage`: a safe, human-readable string summarizing any token/usage metadata (non-serializable fields are stringified).
+
+Example parsed event (truncated):
+
+```json
+{
+    "model_version": "gemini-2.0-flash",
+    "role": "assistant",
+    "text": "Monitoring started for ProductionChatAgent.",
+    "function_call": {"name":"monitor_agent","args":{"agent_name":"ProductionChatAgent"}},
+    "function_responses": [{"id":"fn-1","name":"monitor_agent","response":"{\"status\": \"monitoring_started\"}"}],
+    "finish_reason": "function_call",
+    "usage": "tokens: 32"
+}
+```
+
+Use the notebook as the canonical demo for competition submissions — it shows how to run tests, collect structured outputs, and generate an optimization report (`generate_fix_report`).
+
+
+---
+
 ## 📁 Project Structure
 
 ```
