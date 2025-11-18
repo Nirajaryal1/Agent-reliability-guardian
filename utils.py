@@ -108,3 +108,68 @@ class CircuitBreaker:
 
 
 logger = setup_logging()
+
+def parse_adk_event(event) -> Dict[str, Any]:
+    """
+    Parse an event emitted by the ADK `run_async` loop and return a structured
+    dictionary containing the most useful fields (model_version, role, text,
+    function_call, function_response, finish_reason, usage). This makes demo
+    output and tests easier to inspect.
+    """
+    out: Dict[str, Any] = {}
+
+    try:
+        # model version
+        out["model_version"] = getattr(event, "model_version", None)
+
+        content = getattr(event, "content", None)
+        if content is None:
+            return out
+
+        out["role"] = getattr(content, "role", None)
+
+        # collect text parts
+        texts = []
+        def _safe(v):
+            if v is None or isinstance(v, (str, int, float, bool)):
+                return v
+            try:
+                json.dumps(v)
+                return v
+            except Exception:
+                return str(v)
+
+        for part in getattr(content, "parts", []) or []:
+            # function call requested by model
+            if hasattr(part, "function_call") and getattr(part, "function_call") is not None:
+                fc = part.function_call
+                out["function_call"] = {"name": fc.name, "id": fc.id, "args": _safe(fc.args)}
+                continue
+
+            # function response from tool
+            if hasattr(part, "function_response") and getattr(part, "function_response") is not None:
+                fr = part.function_response
+                # try to parse result if it's JSON-like
+                resp = fr.response if hasattr(fr, "response") else None
+                out.setdefault("function_responses", []).append({"id": fr.id, "name": fr.name, "response": _safe(resp)})
+                continue
+
+            # text part
+            text = getattr(part, "text", None)
+            if text:
+                texts.append(text)
+
+        if texts:
+            out["text"] = "\n".join(texts)
+
+        # finish reason and usage metadata if present
+        out["finish_reason"] = getattr(event, "finish_reason", None)
+        usage = getattr(event, "usage_metadata", None)
+        if usage is not None:
+            # usage objects often contain complex non-serializable types; stringify safely
+            out["usage"] = _safe(usage)
+
+    except Exception as e:
+        out["_parse_error"] = str(e)
+
+    return out

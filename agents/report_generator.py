@@ -8,12 +8,20 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 load_dotenv()
 
+# Ensure repo root is on Python path so `from utils import ...` works when running modules
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 # Real ADK imports
 from google.adk import Agent
 from google.adk.tools import FunctionTool
 from google.adk.runners import InMemoryRunner
 
 logger = logging.getLogger(__name__)
+
+# Utils
+from utils import to_json, parse_adk_event
 
 # --- Tool Definitions ---
 
@@ -177,7 +185,8 @@ async def main():
         session_id="demo_session",
         new_message=Content(role="user", parts=[Part(text="Generate report for ProductionChatAgent")])
     ):
-        print(f"Event: {event}")
+        parsed = parse_adk_event(event)
+        print(to_json(parsed))
 
 if __name__ == "__main__":
     import asyncio
