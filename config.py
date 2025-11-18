@@ -1,8 +1,13 @@
 """Configuration management for Agent Reliability Guardian."""
 
 import os
+from dotenv import load_dotenv
 from dataclasses import dataclass
 from typing import Optional
+
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 @dataclass
